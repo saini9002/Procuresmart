@@ -1,0 +1,22 @@
+{
+  "Vertex Systems": {
+    "file": "Vertex_Systems.xlsx",
+    "format": "xlsx"
+  },
+  "Northstar IT": {
+    "file": "Northstar_IT.pdf",
+    "format": "pdf"
+  },
+  "BluePeak Technologies": {
+    "file": "BluePeak_Technologies.docx",
+    "format": "docx"
+  },
+  "Orion Office Tech": {
+    "file": "Orion_Office_Tech.jpg",
+    "format": "image"
+  },
+  "TechSource India": {
+    "file": "TechSource_India.txt",
+    "format": "txt"
+  }
+}

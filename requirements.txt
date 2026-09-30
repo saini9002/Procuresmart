@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+requests
+openpyxl
+pypdf
+python-docx
+Pillow
+numpy
+python-multipart
+

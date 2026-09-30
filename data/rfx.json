@@ -1,0 +1,19 @@
+{
+  "scope": "Company-wide employee IT hardware refresh for a 5,000-person enterprise: laptops, monitors, docks and peripherals across the line items below, sourced from five approved suppliers. INR preferred (USD accepted), GST and freight stated separately, delivery within 30 days of PO, quotes valid 30 days.",
+  "questionnaire": [
+    "Are you an authorized manufacturer/reseller for the quoted OEMs?",
+    "Do you provide OEM-backed warranty support (state duration)?",
+    "Can you deliver within 30 days of PO?",
+    "Do you hold a current ISO 9001 certification (state validity)?",
+    "Can you share enterprise deployment/support references?"
+  ],
+  "commercial_terms": [
+    "Quote validity: 30 days from submission",
+    "Currency: INR preferred; USD accepted",
+    "State clearly whether GST is included or excluded",
+    "State clearly whether freight/delivery is included or excluded",
+    "State delivery lead time in days",
+    "Quote the exact requested configuration; flag any alternative offered",
+    "Evaluation FX rate: INR 95 / USD"
+  ]
+}

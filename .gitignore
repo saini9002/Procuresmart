@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+Gemini API Key.txt
+*.key
+.DS_Store
+_*.py
+_*.json

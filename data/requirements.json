@@ -1,0 +1,212 @@
+[
+  {
+    "id": "IT-001",
+    "category": "Laptop",
+    "description": "Dell Latitude 5450 - Core Ultra 5, 16GB, 512GB SSD, 14\" FHD",
+    "uom": "ea",
+    "quantity": 300.0
+  },
+  {
+    "id": "IT-002",
+    "category": "Laptop",
+    "description": "Dell Latitude 5450 - Core Ultra 7, 32GB, 512GB SSD, 14\" FHD",
+    "uom": "ea",
+    "quantity": 120
+  },
+  {
+    "id": "IT-003",
+    "category": "Laptop",
+    "description": "Lenovo ThinkPad T14 Gen 5 - Ultra 5, 16GB, 512GB SSD, 14\" WUXGA",
+    "uom": "ea",
+    "quantity": 80
+  },
+  {
+    "id": "IT-004",
+    "category": "Laptop",
+    "description": "Apple MacBook Air 13\" - M3, 16GB, 512GB",
+    "uom": "ea",
+    "quantity": 60
+  },
+  {
+    "id": "IT-005",
+    "category": "Laptop",
+    "description": "Apple MacBook Pro 14\" - M4, 16GB, 512GB",
+    "uom": "ea",
+    "quantity": 40
+  },
+  {
+    "id": "IT-006",
+    "category": "Laptop",
+    "description": "Lenovo ThinkPad E14 Gen 6 - Ultra 5, 16GB, 512GB SSD, 14\" WUXGA",
+    "uom": "ea",
+    "quantity": 100
+  },
+  {
+    "id": "IT-007",
+    "category": "Monitor",
+    "description": "Dell P2425H - 24\" FHD IPS, height-adjustable",
+    "uom": "ea",
+    "quantity": 180
+  },
+  {
+    "id": "IT-008",
+    "category": "Monitor",
+    "description": "Dell P2725H - 27\" FHD IPS, height-adjustable",
+    "uom": "ea",
+    "quantity": 140
+  },
+  {
+    "id": "IT-009",
+    "category": "Monitor",
+    "description": "Dell P2723QE - 27\" 4K USB-C, 90W PD",
+    "uom": "ea",
+    "quantity": 60
+  },
+  {
+    "id": "IT-010",
+    "category": "Monitor",
+    "description": "Lenovo ThinkVision T24i-30 - 24\" FHD IPS",
+    "uom": "ea",
+    "quantity": 100
+  },
+  {
+    "id": "IT-011",
+    "category": "Monitor",
+    "description": "LG 27UP650 - 27\" 4K IPS, USB-C",
+    "uom": "ea",
+    "quantity": 50
+  },
+  {
+    "id": "IT-012",
+    "category": "Dock",
+    "description": "Dell WD19S - USB-C 130W dock",
+    "uom": "ea",
+    "quantity": 180
+  },
+  {
+    "id": "IT-013",
+    "category": "Dock",
+    "description": "Dell WD22TB4 - Thunderbolt 4 dock, 180W",
+    "uom": "ea",
+    "quantity": 100
+  },
+  {
+    "id": "IT-014",
+    "category": "Dock",
+    "description": "Lenovo ThinkPad Universal USB-C Dock - 100W",
+    "uom": "ea",
+    "quantity": 90
+  },
+  {
+    "id": "IT-015",
+    "category": "Keyboard",
+    "description": "Logitech MX Keys for Business",
+    "uom": "ea",
+    "quantity": 120
+  },
+  {
+    "id": "IT-016",
+    "category": "Keyboard",
+    "description": "Dell KB522 - USB wired keyboard",
+    "uom": "ea",
+    "quantity": 200
+  },
+  {
+    "id": "IT-017",
+    "category": "Keyboard",
+    "description": "Logitech K120 - USB wired keyboard",
+    "uom": "ea",
+    "quantity": 150
+  },
+  {
+    "id": "IT-018",
+    "category": "Mouse",
+    "description": "Logitech MX Master 3S",
+    "uom": "ea",
+    "quantity": 60
+  },
+  {
+    "id": "IT-019",
+    "category": "Mouse",
+    "description": "Dell MS116 - USB optical mouse",
+    "uom": "ea",
+    "quantity": 200
+  },
+  {
+    "id": "IT-020",
+    "category": "Mouse",
+    "description": "Logitech M720 Triathlon",
+    "uom": "ea",
+    "quantity": 120
+  },
+  {
+    "id": "IT-021",
+    "category": "Headset",
+    "description": "Jabra Evolve2 40 - USB-C, stereo",
+    "uom": "ea",
+    "quantity": 150
+  },
+  {
+    "id": "IT-022",
+    "category": "Headset",
+    "description": "Poly Blackwire 3325 - USB-C, stereo",
+    "uom": "ea",
+    "quantity": 120
+  },
+  {
+    "id": "IT-023",
+    "category": "Headset",
+    "description": "Logitech Zone Wired - USB-C",
+    "uom": "ea",
+    "quantity": 100
+  },
+  {
+    "id": "IT-024",
+    "category": "Webcam",
+    "description": "Logitech Brio 500 - 1080p",
+    "uom": "ea",
+    "quantity": 60
+  },
+  {
+    "id": "IT-025",
+    "category": "Webcam",
+    "description": "Lenovo 300 FHD Webcam",
+    "uom": "ea",
+    "quantity": 80
+  },
+  {
+    "id": "IT-026",
+    "category": "Cable",
+    "description": "USB-C to HDMI 2.0 cable, 2m",
+    "uom": "ea",
+    "quantity": 200
+  },
+  {
+    "id": "IT-027",
+    "category": "Cable",
+    "description": "USB-C 100W charging cable, 2m",
+    "uom": "ea",
+    "quantity": 200
+  },
+  {
+    "id": "IT-028",
+    "category": "Cable",
+    "description": "DisplayPort 1.4 cable, 2m",
+    "uom": "ea",
+    "quantity": 100
+  },
+  {
+    "id": "IT-029",
+    "category": "Adapter",
+    "description": "USB-C 65W power adapter, compatible with laptops",
+    "uom": "ea",
+    "quantity": 100
+  },
+  {
+    "id": "IT-030",
+    "category": "Cable",
+    "description": "HDMI cable 2.0, 2m",
+    "uom": "ea",
+    "quantity": 100
+  }
+]
