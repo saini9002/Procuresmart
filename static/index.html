@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Kill the Quote Spreadsheet</title>
+<style>
+:root{
+  --bg:#f4f5f9;--panel:#ffffff;--ink:#0f172a;--muted:#64748b;--line:#e6e8f0;
+  --brand:#4f46e5;--brand-ink:#4338ca;--brand-soft:#eef0fe;
+  --good:#047857;--good-soft:#ecfdf5;--warn:#b45309;--warn-soft:#fff7ed;
+  --bad:#be123c;--bad-soft:#fff1f2;--nav:#0b1020;--shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+a{color:var(--brand-ink);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.top{height:60px;background:var(--nav);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.02em}
+.brand .logo{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#6366f1,#22d3ee);display:grid;place-items:center;font-size:14px}
+.brand .sub{font-weight:500;font-size:12px;color:#aab2c5;margin-left:2px}
+.status{display:flex;align-items:center;gap:8px;font-size:12px;color:#cbd3e1}
+.dot{width:8px;height:8px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.18)}
+.dot.good{background:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.18)}
+
+.layout{display:flex;min-height:calc(100vh - 60px)}
+.side{width:224px;background:var(--panel);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:2px}
+.side .grp{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:14px 12px 6px}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;color:#475569;font-size:14px;cursor:pointer;font-weight:500}
+.nav:hover{background:#f1f3f9}
+.nav.active{background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
+.nav .ico{width:18px;text-align:center}
+.nav .stepno{width:20px;min-width:20px;height:20px;border-radius:50%;background:#eef0f6;color:#64748b;font-size:11px;font-weight:700;display:grid;place-items:center}
+.nav.active .stepno{background:var(--brand);color:#fff}
+
+.main{flex:1;padding:26px 30px;overflow:auto}
+.page{max-width:1500px;margin:0 auto}
+.h1{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px}
+.desc{color:var(--muted);font-size:14px;margin-bottom:20px;max-width:820px}
+
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.metric{font-size:28px;font-weight:700;letter-spacing:-.02em}
+.label{font-size:12px;color:var(--muted);margin-top:3px}
+h2{font-size:15px;margin:0 0 12px;font-weight:650}
+.section{margin-top:22px}
+
+.btn{border:1px solid #d7dbe7;background:#fff;color:#1f2937;padding:9px 14px;border-radius:9px;font-size:13px;font-weight:550;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.12s}
+.btn:hover{border-color:#c3c9da;background:#fafbff}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-ink)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--brand-ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.mic{border-color:#d7dbe7}
+.btn.mic.rec{background:var(--bad-soft);border-color:#fecdd3;color:var(--bad)}
+.btn.mic.rec .pulse{width:8px;height:8px;border-radius:50%;background:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{0%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}100%{opacity:1;transform:scale(1)}}
+
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.gray{background:#f1f3f9;color:#64748b}
+.adjchip{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #d5d9f7;border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:600;margin:2px 3px 0 0;white-space:nowrap}
+.prov{display:inline-block;color:#fff;border-radius:5px;padding:1px 6px;font-size:10px;font-weight:700;margin-top:3px;letter-spacing:.2px}
+.ractions{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px}
+.rbtn{border:1px solid #cbd2e6;background:#fff;color:#334155;border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:600;cursor:pointer;line-height:1.5}
+.rbtn:hover{background:#f4f6fb}
+.rbtn.ok{border-color:#9ae6b4;color:#15803d}.rbtn.ok:hover{background:#f0fdf4}
+.rbtn.no{border-color:#fbb;color:#b91c1c}.rbtn.no:hover{background:#fef2f2}
+.reviewbar{background:#fff8ec;border:1px solid #f5d9a8;border-radius:12px;padding:12px 16px;font-size:13.5px;color:#7c5312}
+.okbar{background:var(--good-soft);border:1px solid #a7e0c0;border-radius:12px;padding:12px 16px;font-size:13.5px;color:#15803d;font-weight:600}
+.btn.small{padding:5px 11px;font-size:12px}
+.riskchip{display:inline-block;background:var(--warn-soft);color:var(--warn);border:1px solid #f5d9a8;border-radius:6px;padding:1px 7px;font-size:10.5px;font-weight:600;margin:2px 3px 0 0}
+
+.toolbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:6px}
+.input,textarea.input{width:100%;border:1px solid #d7dbe7;border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;line-height:1.5;color:var(--ink);background:#fff;resize:vertical}
+.input:focus,textarea.input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+
+.tablewrap{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:auto;box-shadow:var(--shadow)}
+.table{width:100%;border-collapse:collapse;font-size:12.5px}
+.table th{background:#f8f9fc;color:#64748b;text-align:left;font-weight:600;position:sticky;top:0;z-index:2;white-space:nowrap}
+.table th,.table td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.table td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.table tr:hover td{background:#fbfcff}
+.low{background:var(--good-soft)!important}
+.review{background:var(--warn-soft)!important}
+.small{font-size:11px}
+.muted{color:var(--muted)}
+.mono{font-variant-numeric:tabular-nums}
+
+.callout{background:linear-gradient(180deg,#fbfcff,#f6f8ff);border:1px solid #e2e6f5;border-left:3px solid var(--brand);border-radius:10px;padding:13px 15px;font-size:13px;color:#334155}
+.notice{background:var(--warn-soft);border:1px solid #fde4c7;border-radius:10px;padding:12px 14px;font-size:13px;color:#7c4a12}
+.ok{background:var(--good-soft);border:1px solid #bbf3d8;border-radius:10px;padding:12px 14px;font-size:13px;color:#065f46}
+
+.kpis{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 4px}
+.kpi{flex:1;min-width:150px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.kpi b{font-size:20px;display:block;letter-spacing:-.01em}
+.kpi span{font-size:11px;color:var(--muted)}
+
+.resp{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.resp .card .fmt{font-size:11px;font-weight:600;color:#fff;border-radius:6px;padding:2px 7px;display:inline-block}
+.fmt.XLSX{background:#16a34a}.fmt.PDF{background:#dc2626}.fmt.DOCX{background:#2563eb}.fmt.JPG{background:#7c3aed}.fmt.TXT{background:#0891b2}
+
+.chat{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 250px);min-height:440px}
+.messages{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
+.msg{display:flex}
+.msg.user{justify-content:flex-end}
+.bubble{max-width:80%;padding:12px 14px;border-radius:14px;font-size:13.5px;line-height:1.5}
+.msg.user .bubble{background:var(--brand);color:#fff;border-bottom-right-radius:4px}
+.msg.ai .bubble{background:#f6f7fb;color:#1f2937;border-bottom-left-radius:4px;max-width:88%}
+.composer{border-top:1px solid var(--line);padding:12px;display:flex;gap:8px;align-items:center}
+.composer input{flex:1;border:1px solid #d7dbe7;border-radius:10px;padding:11px 12px;font-size:14px}
+.composer input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.suggest{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.suggest .btn{font-size:12px}
+
+.outbox{display:flex;flex-direction:column;gap:10px}
+.mailrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);opacity:0;transform:translateY(6px);animation:fly .4s forwards}
+@keyframes fly{to{opacity:1;transform:none}}
+.mailrow .env{width:30px;height:30px;border-radius:8px;background:var(--brand-soft);display:grid;place-items:center}
+.mailrow .to{font-size:13px;font-weight:600}
+.mailrow .addr{font-size:11px;color:var(--muted)}
+.spin{width:14px;height:14px;border:2px solid #cbd5e1;border-top-color:var(--brand);border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+svg text{font-family:inherit}
+.bar-tip{font-size:11px;fill:var(--muted)}
+ul.tight{margin:6px 0;padding-left:18px}ul.tight li{margin:3px 0;font-size:13px}
+.hidden{display:none}
+.flow{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-bottom:18px}
+.flow .step2{background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 11px}
+.flow .step2.on{background:var(--brand-soft);color:var(--brand-ink);border-color:#d5d9f7;font-weight:600}
+@media(max-width:1080px){.g4{grid-template-columns:1fr 1fr}.resp{grid-template-columns:1fr 1fr}.g3,.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><span class="logo">⚡</span>Kill the Quote Spreadsheet</div>
+  <div class="status"><span id="dot" class="dot"></span><span id="aiStatus">checking…</span></div>
+</div>
+<div class="layout">
+  <aside class="side">
+    <div class="grp">Workflow</div>
+    <div class="nav active" data-page="overview"><span class="ico">◎</span>Overview</div>
+    <div class="grp">Steps</div>
+    <div class="nav" data-page="rfx"><span class="stepno">1</span>RFx co-pilot</div>
+    <div class="nav" data-page="send"><span class="stepno">2</span>Send to vendors</div>
+    <div class="nav" data-page="responses"><span class="stepno">3</span>Responses</div>
+    <div class="nav" data-page="comparison"><span class="stepno">4</span>Comparison</div>
+    <div class="nav" data-page="analyst"><span class="stepno">5</span>AI analyst</div>
+  </aside>
+  <main class="main"><div class="page" id="app"></div></main>
+</div>
+
+<script>
+const FX_FALLBACK=95;
+const state={page:'overview',req:null,approved:[],selected:[],sent:false,sentInfo:null,inbox:[],received:false,collected:{},extracted:null,messages:[],loading:false,recording:false,editLine:null,extractError:null,q:'',copInput:'',rfxLog:[],editScope:false,editQ:false,editC:false};
+const $=id=>document.getElementById(id);
+const fx=()=>state.req?.fx_rate_usd_inr||FX_FALLBACK;
+
+async function getJSON(url,opts){const r=await fetch(url,opts);if(!r.ok){throw new Error(await r.text())}return r.json()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function inr(n){return n==null?'-':'₹'+Math.round(n).toLocaleString('en-IN')}
+function inr2(n){return n==null?'-':'₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2})}
+function pill(s){const c=(s==='QUOTED'||s==='PASS')?'good':(s==='AMBIGUOUS'||s==='UNKNOWN')?'warn':(s==='MISSING'||s==='FAIL')?'bad':'gray';return `<span class="pill ${c}">${esc(s)}</span>`}
+
+/* ---------- shared helpers over the normalized dataset ---------- */
+function norm(q){return q?.normalization?.normalized_unit_price_inr ?? null}
+function isComparable(q){return q&&q.status==='QUOTED'&&q.normalization?.comparable}
+function openAssumption(q){return q&&q.status==='QUOTED'&&q.normalization?.comparable&&q.assumption&&!q.assumption_confirmed&&!q.provenance}
+function vendorMap(){const m={};if(!state.extracted)return m;state.extracted.vendors.forEach(v=>v.quotes.forEach(q=>{m[v.vendor+'|'+q.line_id]={...q,vendor:v.vendor,qual:v.qualification.status}}));return m}
+function counts(){let quoted=0,amb=0,missing=0;if(state.extracted)state.extracted.vendors.forEach(v=>v.quotes.forEach(q=>{if(q.status==='QUOTED')quoted++;else if(q.status==='AMBIGUOUS')amb++;else missing++}));return{quoted,amb,missing}}
+
+/* ---------- tiny inline SVG charts (no deps) ---------- */
+function barChart(labels,values,unit,opts={}){
+ const w=opts.w||560,h=opts.h||220,pad=34,bw=(w-pad*2)/labels.length;
+ const max=Math.max(1,...values);
+ let bars='';
+ labels.forEach((l,i)=>{
+  const bh=(values[i]/max)*(h-pad*2);
+  const x=pad+i*bw+bw*0.16,y=h-pad-bh,bwid=bw*0.68;
+  bars+=`<rect x="${x}" y="${y}" width="${bwid}" height="${bh}" rx="5" fill="${opts.color||'#6366f1'}"><title>${esc(l)}: ${esc(fmtVal(values[i],unit))}</title></rect>`;
+  bars+=`<text x="${x+bwid/2}" y="${y-6}" text-anchor="middle" font-size="11" fill="#334155">${esc(fmtVal(values[i],unit))}</text>`;
+  bars+=`<text x="${x+bwid/2}" y="${h-pad+14}" text-anchor="middle" font-size="11" fill="#64748b">${esc(l)}</text>`;
+ });
+ return `<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px"><line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#e6e8f0"/>${bars}</svg>`;
+}
+function fmtVal(v,unit){if(unit==='INR')return inr(v);if(unit==='%')return v+'%';if(unit==='lines'||unit==='count')return v;return (v?.toLocaleString?.()||v)+(unit?(' '+unit):'')}
+const COV_SEG=[['#34d399','ready'],['#a78bfa','assumption'],['#fb923c','substitute'],['#fbbf24','ambiguous'],['#fb7185','missing']];
+function lineCat(q){
+ if(q.spec_mismatch)return 'substitute';
+ if(q.status==='MISSING')return 'missing';
+ if(q.status==='AMBIGUOUS')return 'ambiguous';
+ if(q.status==='QUOTED'&&!q.provenance&&!q.normalization?.comparable)return 'ambiguous';
+ if(openAssumption(q))return 'assumption';
+ return 'ready';
+}
+function coverageChart(){
+ const vs=state.extracted.vendors,w=680,h=210,pad=30,bw=(w-pad*2)/vs.length;
+ const total=state.req.items.length;
+ let out='';
+ vs.forEach((v,i)=>{
+  const c={ready:0,assumption:0,substitute:0,ambiguous:0,missing:0};
+  v.quotes.forEach(q=>{c[lineCat(q)]++});
+  const x=pad+i*bw+bw*0.2,bwid=bw*0.6;let y=h-pad;
+  COV_SEG.forEach(([col,key])=>{const sh=(c[key]/total)*(h-pad*2);y-=sh;if(sh>0.4)out+=`<rect x="${x}" y="${y}" width="${bwid}" height="${sh}" fill="${col}"><title>${esc(v.vendor)} ${key}: ${c[key]}</title></rect>`});
+  out+=`<text x="${x+bwid/2}" y="${h-pad+15}" text-anchor="middle" font-size="10.5" fill="#64748b">${esc(v.vendor.split(' ')[0])}</text>`;
+ });
+ const legend=COV_SEG.map(([col,name])=>`<span style="display:inline-flex;align-items:center;gap:5px;margin-right:14px"><span style="width:10px;height:10px;border-radius:2px;background:${col};display:inline-block"></span><span class="small muted">${name}</span></span>`).join('');
+ return `<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px"><line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#e6e8f0"/>${out}</svg><div style="margin-top:6px">${legend}</div>`;
+}
+
+/* ---------- router ---------- */
+function render(){
+ const p=state.page;document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===p));
+ ({overview,rfx,send,responses,comparison,analyst}[p]||overview)();
+}
+
+/* ---------- pages ---------- */
+function flowBar(active){
+ const steps=[['rfx','Draft RFx'],['send','Send'],['responses','Collect'],['comparison','Normalize and compare'],['analyst','Decide']];
+ return `<div class="flow">${steps.map(([k,l],i)=>`<span class="step2 ${k===active?'on':''}">${i+1}. ${l}</span>${i<steps.length-1?'<span>→</span>':''}`).join('')}</div>`;
+}
+
+function overview(){
+ const ready=!!state.extracted;
+ $('app').innerHTML=`
+ <div class="h1">IT Hardware Procurement Workspace</div>
+ <div class="desc">Draft the RFx, collect supplier responses in whatever format they arrive, and compare them on a single normalized basis to reach a defensible award.</div>
+ ${flowBar(state.page)}
+ <div class="section grid g3">
+   <div class="card"><h2>Structured intake</h2><p class="muted" style="font-size:13.5px;line-height:1.55;margin:6px 0 0">Read every supplier reply in whatever form it arrives (spreadsheet, PDF, document, a scanned rate-card photo, or the email body itself), even when the quote is split across several files, and map each value to the RFx lines with its supporting evidence kept in view.</p></div>
+   <div class="card"><h2>One comparable basis</h2><p class="muted" style="font-size:13.5px;line-height:1.55;margin:6px 0 0">Put every quote on the same footing: one currency, pre-tax, per single unit, with per-100 and per-box packs converted. The exact adjustments are shown on each price, so the comparison is like-for-like and inspectable.</p></div>
+   <div class="card"><h2>Defensible decisions</h2><p class="muted" style="font-size:13.5px;line-height:1.55;margin:6px 0 0">Interrogate the result in plain language. Answers cite the lines and vendors they rely on, state their assumptions and exclusions, flag what is missing or ambiguous, and leave the final call to the buyer.</p></div>
+ </div>
+ <div class="section"><div class="callout"><b>Decision this tool supports:</b> a <i>defensible, best-value</i> award across <i>qualified</i> suppliers. Every quote is normalized to one comparable basis, and the factors that actually decide the award (qualification, landed cost and freight, delivery, single vs split, plus any missing, ambiguous or alternate-configuration data) are surfaced rather than silently treated as valid, so the buyer awards on value, not a headline number.</div></div>
+ ${ready?'<div class="section"><div class="ok">✓ You have processed quotes into a normalized comparison. Open <b>Comparison</b> or <b>AI analyst</b>.</div></div>':''}
+ <div class="section">
+   <button class="btn primary" onclick="go('rfx')">Start from RFx →</button>
+   ${ready?'<button class="btn" onclick="go(\'comparison\')">Open comparison</button>':''}
+ </div>`;
+}
+
+function rfx(){
+ const items=state.req?.items||[];const r=state.req||{};
+ const voiceOK='webkitSpeechRecognition' in window||'SpeechRecognition' in window;
+ $('app').innerHTML=`
+ <div class="toolbar"><div><div class="h1">RFx co-pilot</div><div class="desc">Build the RFx by talking to the co-pilot. Say which part you mean, the scope, a line item, a questionnaire question, or a commercial term, and it updates below. You can also edit any section by hand.</div></div></div>
+ ${flowBar('rfx')}
+ <div class="card">
+   <div class="small muted" style="margin-bottom:6px">Tell the co-pilot what to add or change${voiceOK?' (type or dictate)':''}</div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+     <input id="cop" class="input" style="flex:1;min-width:300px" value="${esc(state.copInput||'')}" oninput="state.copInput=this.value" placeholder="e.g. Add 40 Dell UltraSharp 27-inch monitors  ·  Set the scope to...  ·  Add a data-security question  ·  Payment terms net 45 days" onkeydown="if(event.key==='Enter')copilot()"/>
+     ${voiceOK?`<button class="btn mic ${state.recording?'rec':''}" onclick="toggleMic('cop')" title="Dictate">${state.recording?'<span class="pulse"></span>':'🎙'}</button>`:''}
+     <button class="btn primary" onclick="copilot()">Send</button>
+   </div>
+   <div id="copLog" style="margin-top:10px">${(state.rfxLog||[]).slice(0,6).map(m=>`<div class="small" style="margin:3px 0;color:${m.err?'var(--bad)':'var(--good)'}">${m.err?'⚠':'✓'} ${esc(m.text)}</div>`).join('')}</div>
+ </div>
+ <div class="section"><div class="card">
+   <div class="toolbar"><h2>Scope</h2>${state.editScope?'':'<button class="btn ghost" onclick="editScope()">Edit</button>'}</div>
+   ${state.editScope?`<textarea id="scopeEdit" class="input" rows="4">${esc(r.scope||'')}</textarea><div style="margin-top:8px"><button class="btn primary" onclick="saveScope()">Save</button> <button class="btn ghost" onclick="cancelScope()">Cancel</button></div>`:`<p class="small" style="line-height:1.6;margin:0">${esc(r.scope||'No scope yet. Ask the co-pilot to set one.')}</p>`}
+ </div></div>
+ <div class="section"><div class="card">
+   <div class="toolbar"><h2>${items.length} line items</h2></div>
+   <div class="tablewrap"><table class="table"><thead><tr><th>Ref</th><th>Category</th><th>Requirement</th><th class="num">Qty</th><th>UOM</th><th></th></tr></thead>
+   <tbody>${items.map(lineRow).join('')}</tbody></table></div>
+ </div></div>
+ <div class="section grid g2">
+   <div class="card">
+     <div class="toolbar"><h2>Supplier questionnaire</h2>${state.editQ?'':'<button class="btn ghost" onclick="editList(\'q\')">Edit</button>'}</div>
+     ${listSection('q', r.questionnaire)}
+   </div>
+   <div class="card">
+     <div class="toolbar"><h2>Commercial terms</h2>${state.editC?'':'<button class="btn ghost" onclick="editList(\'c\')">Edit</button>'}</div>
+     ${listSection('c', r.commercial_terms)}
+   </div>
+ </div>
+ <div class="section"><button class="btn primary" onclick="go('send')">Next: send to vendors →</button></div>`;
+}
+function lineRow(i){
+ if(state.editLine===i.id){
+   return `<tr>
+     <td class="mono">${esc(i.id)}</td>
+     <td><input class="input" id="ed-category" value="${esc(i.category)}" style="min-width:90px"></td>
+     <td><input class="input" id="ed-description" value="${esc(i.description)}" style="min-width:240px"></td>
+     <td class="num"><input class="input" id="ed-quantity" type="number" value="${i.quantity}" style="width:80px;text-align:right"></td>
+     <td><input class="input" id="ed-uom" value="${esc(i.uom)}" style="width:60px"></td>
+     <td style="white-space:nowrap"><button class="btn" onclick="saveLine('${i.id}')">Save</button> <button class="btn ghost" onclick="cancelEdit()">Cancel</button></td>
+   </tr>`;
+ }
+ return `<tr>
+   <td class="mono">${esc(i.id)}</td><td>${esc(i.category)}</td><td>${esc(i.description)}</td>
+   <td class="num">${i.quantity}</td><td>${esc(i.uom)}</td>
+   <td style="white-space:nowrap"><button class="btn ghost" onclick="editLine('${i.id}')">Edit</button> <button class="btn ghost" onclick="deleteLine('${i.id}')">Delete</button></td>
+ </tr>`;
+}
+function editLine(id){state.editLine=id;render()}
+function cancelEdit(){state.editLine=null;render()}
+async function saveLine(id){
+ const body={category:$('ed-category').value,description:$('ed-description').value,uom:$('ed-uom').value,quantity:parseFloat($('ed-quantity').value)||0};
+ try{const r=await getJSON('/api/line-items/'+encodeURIComponent(id),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});state.req.items=r.items;state.editLine=null;render()}
+ catch(e){alert(e.message)}
+}
+async function deleteLine(id){
+ if(!confirm('Delete line '+id+'?'))return;
+ try{const r=await getJSON('/api/line-items/'+encodeURIComponent(id),{method:'DELETE'});state.req.items=r.items;if(state.editLine===id)state.editLine=null;render()}
+ catch(e){alert(e.message)}
+}
+function listSection(kind,arr){
+ arr=arr||[];
+ const editing=kind==='q'?state.editQ:state.editC;
+ if(editing){
+   return `<textarea id="list-${kind}" class="input" rows="${Math.max(3,arr.length+1)}">${esc(arr.join('\n'))}</textarea><div class="small muted" style="margin-top:4px">One item per line.</div><div style="margin-top:8px"><button class="btn primary" onclick="saveList('${kind}')">Save</button> <button class="btn ghost" onclick="cancelList('${kind}')">Cancel</button></div>`;
+ }
+ return arr.length?`<ul class="tight">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p class="small muted">None yet. Ask the co-pilot to add items.</p>';
+}
+function editScope(){state.editScope=true;render()}
+function cancelScope(){state.editScope=false;render()}
+async function saveScope(){
+ const scope=$('scopeEdit').value;
+ try{const r=await getJSON('/api/rfx',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({scope})});applyRfx(r.rfx);state.editScope=false;render()}
+ catch(e){alert(e.message)}
+}
+function editList(k){if(k==='q')state.editQ=true;else state.editC=true;render()}
+function cancelList(k){if(k==='q')state.editQ=false;else state.editC=false;render()}
+async function saveList(k){
+ const lines=$('list-'+k).value.split('\n').map(s=>s.trim()).filter(Boolean);
+ const key=k==='q'?'questionnaire':'commercial_terms';
+ try{const r=await getJSON('/api/rfx',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({[key]:lines})});applyRfx(r.rfx);if(k==='q')state.editQ=false;else state.editC=false;render()}
+ catch(e){alert(e.message)}
+}
+function applyRfx(rfx){if(!state.req||!rfx)return;state.req.scope=rfx.scope;state.req.questionnaire=rfx.questionnaire;state.req.commercial_terms=rfx.commercial_terms}
+async function copilot(){
+ const el=$('cop');const msg=(el?.value||'').trim();if(!msg)return;
+ state.copInput='';
+ const log=$('copLog');if(log)log.innerHTML='<div class="small muted"><span class="spin"></span> Updating the RFx…</div>';
+ try{
+   const r=await getJSON('/api/rfx-copilot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+   applyRfx(r.rfx);if(state.req)state.req.items=r.items;
+   state.rfxLog=state.rfxLog||[];state.rfxLog.unshift({text:r.message});
+   render();
+ }catch(e){state.rfxLog=state.rfxLog||[];state.rfxLog.unshift({text:e.message,err:true});render()}
+}
+
+/* ---------- voice dictation (Web Speech API) ---------- */
+let recog=null;
+function toggleMic(inputId){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+ if(state.recording){recog&&recog.stop();return}
+ recog=new SR();recog.lang='en-IN';recog.interimResults=true;recog.continuous=true;
+ const start=($(inputId)&&$(inputId).value)?$(inputId).value+' ':'';
+ recog.onresult=e=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;const b=$(inputId);if(b){b.value=start+t;if(inputId==='cop')state.copInput=b.value;if(inputId==='q')state.q=b.value}};
+ recog.onend=()=>{state.recording=false;render()};
+ recog.onerror=()=>{state.recording=false;render()};
+ recog.start();state.recording=true;render();
+}
+
+/* ---------- send to vendors (email) ---------- */
+function send(){
+ const ap=state.approved||[];const sel=new Set(state.selected||[]);
+ $('app').innerHTML=`
+ <div class="h1">Send to vendors</div>
+ <div class="desc">Choose which approved suppliers to invite, then send the RFx by email. Each supplier gets a personalized email you can preview.</div>
+ ${flowBar('send')}
+ <div class="card">
+   <div class="small muted" style="margin-bottom:10px">Approved suppliers: select who receives the RFx</div>
+   <div class="grid g3" style="gap:10px">${ap.map(a=>`<label style="display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer">
+     <input type="checkbox" ${sel.has(a.vendor)?'checked':''} onchange="toggleVendor('${esc(a.vendor)}')">
+     <div><div style="font-size:13px;font-weight:600">${esc(a.vendor)}</div><div class="small muted">${esc(a.email)}</div></div></label>`).join('')}</div>
+   <div style="margin-top:14px"><button class="btn primary" onclick="sendRfx()">✉ Send RFx to ${sel.size} vendor${sel.size===1?'':'s'}</button></div>
+ </div>
+ <div class="section" id="outbox">${state.sentInfo?outboxHtml(state.sentInfo):''}</div>`;
+}
+function toggleVendor(v){const s=new Set(state.selected);s.has(v)?s.delete(v):s.add(v);state.selected=[...s];render()}
+function outboxHtml(s){
+ return `<div class="ok">✓ RFx sent to ${s.count} supplier${s.count===1?'':'s'} at ${new Date(s.sent_at).toLocaleTimeString()}.</div>
+ <div class="outbox" style="margin-top:12px">${s.vendors.map((m,i)=>`<div class="mailrow" style="animation-delay:${i*0.1}s"><span class="env">✉</span><div style="flex:1"><div class="to">${esc(m.vendor)}</div><div class="addr">${esc(m.to)}</div></div><button class="btn ghost" onclick="showEmail('${esc(m.vendor)}')">View Sent Email</button></div>`).join('')}</div>
+ <div class="section"><button class="btn primary" onclick="go('responses')">Next: Check vendor responses →</button></div>`;
+}
+async function sendRfx(){
+ if(!state.selected.length){alert('Select at least one vendor.');return}
+ const box=$('outbox');box.innerHTML='<div class="notice"><span class="spin"></span> Sending…</div>';
+ try{const r=await getJSON('/api/send-rfx',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vendors:state.selected})});state.sentInfo=r;state.sent=true;state.received=false;state.collected={};render()}
+ catch(e){box.innerHTML=`<div class="notice">${esc(e.message)}</div>`}
+}
+function showEmail(v){
+ const em=state.sentInfo?.emails?.[v];if(!em)return;
+ openModal(`<div style="max-width:640px"><div class="small muted">From: ${esc(em.from)}</div><div class="small muted">To: ${esc(em.to)}</div><div style="font-weight:700;margin:6px 0">${esc(em.subject)}</div><div class="small muted" style="margin-bottom:8px">📎 ${esc(em.attachment)}</div><pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.55;background:#f8f9fc;border:1px solid var(--line);border-radius:10px;padding:14px;margin:0">${esc(em.body)}</pre></div>`);
+}
+function openModal(html){let o=$('modal');if(!o){o=document.createElement('div');o.id='modal';o.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);display:grid;place-items:center;z-index:70;padding:20px';o.onclick=e=>{if(e.target===o)closeModal()};document.body.appendChild(o)}o.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px;box-shadow:var(--shadow);max-height:85vh;overflow:auto;position:relative">${html}<div style="margin-top:14px;text-align:right"><button class="btn" onclick="closeModal()">Close</button></div></div>`}
+function closeModal(){const o=$('modal');if(o)o.remove()}
+
+function responses(){
+ if(!state.sent){$('app').innerHTML=`<div class="h1">Vendor responses</div>${flowBar('responses')}<div class="notice">Send the RFx to vendors first.</div><div class="section"><button class="btn primary" onclick="go('send')">Go to Send →</button></div>`;return}
+ const inbox=state.inbox||[];const collected=state.collected||{};const addedVendors=Object.keys(collected);const anyFiles=addedVendors.length>0;
+ $('app').innerHTML=`
+ <div class="h1">Vendor responses</div>
+ <div class="desc">Replies arrive as emails. Add a supplier's quote to move their files into the comparison set below; the AI extractor then figures out which file is the quote, the questionnaire answers, an ignorable note, or a prior-year reference.</div>
+ ${flowBar('responses')}
+ ${!state.received?`<div class="card"><div class="small muted" style="margin-bottom:10px">You sent the RFx to ${state.selected.length} supplier${state.selected.length===1?'':'s'}. Their replies are on the way.</div><button class="btn primary" onclick="receiveResponses()">⬇ Check vendor responses</button></div>`:''}
+ ${state.received?`
+   <div class="section"><div class="toolbar"><h2>Inbox (${inbox.length})</h2><button class="btn" onclick="addAll()">Add all quotes</button></div>
+     <div class="card" style="padding:8px"><div class="outbox">${inbox.map(m=>emailRow(m,collected)).join('')}</div></div>
+   </div>`:''}
+ ${anyFiles?`
+   <div class="section"><h2>Files added for comparison</h2>
+     <div class="resp" style="grid-template-columns:1fr 1fr">${addedVendors.map(v=>collectedCard(v,collected[v])).join('')}</div>
+   </div>`:''}
+ ${state.extractError?'<div class="section"><div class="notice" style="border-color:#fecdd3;background:var(--bad-soft);color:#9f1239"><b>Could not process responses:</b> '+esc(state.extractError)+'</div></div>':''}
+ ${state.received?`<div class="section"><button class="btn primary" ${(!anyFiles||state.loading)?'disabled':''} onclick="extractAll()">${state.loading?'<span class="spin"></span> Processing…':(state.extracted?'Re-process quotes':'▶ Process quotes for comparison')}</button>
+   ${state.extracted?'<button class="btn" onclick="go(\'comparison\')">See comparison →</button>':''}
+   ${!anyFiles?'<span class="small muted" style="margin-left:8px">Add at least one supplier quote first.</span>':''}</div>`:''}`;
+}
+function emailRow(m,collected){
+ const added=(collected[m.vendor]||[]).length>0;
+ return `<div class="mailrow"><span class="env">✉</span>
+   <div style="flex:1"><div class="to">${esc(m.vendor)}</div><div class="addr">${esc(m.from)} · ${m.attachments.length?(m.attachments.length+' attachment'+(m.attachments.length>1?'s':'')):'quote in body'}</div></div>
+   <button class="btn ghost" onclick="showResponseEmail('${esc(m.vendor)}')">See response email</button>
+   ${added?'<span class="pill good">Added</span>':`<button class="btn primary" onclick="addVendor('${esc(m.vendor)}')">Add quote for comparison</button>`}
+ </div>`;
+}
+function showResponseEmail(v){
+ const m=(state.inbox||[]).find(x=>x.vendor===v);if(!m)return;
+ const att=m.attachments.length?`<div class="small muted" style="margin-bottom:8px">${m.attachments.map(a=>'📎 '+esc(a.name)).join('&nbsp;&nbsp;')}</div>`:'<div class="small muted" style="margin-bottom:8px">No attachment. The quote is in the email body.</div>';
+ openModal(`<div style="max-width:640px"><div class="small muted">From: ${esc(m.from)}</div><div style="font-weight:700;margin:6px 0">${esc(m.subject)}</div>${att}<pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.55;background:#f8f9fc;border:1px solid var(--line);border-radius:10px;padding:14px;margin:0">${esc(m.body)}</pre></div>`);
+}
+function collectedCard(v,files){
+ return `<div class="card">
+   <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:650">${esc(v)}</div><div style="display:flex;gap:8px;align-items:center"><span class="pill good">${files.length} file${files.length>1?'s':''}</span><button class="btn ghost" onclick="removeVendor('${esc(v)}')">Remove</button></div></div>
+   <ul class="tight" style="margin-top:8px">${files.map(f=>`<li><a href="/api/responses/file?vendor=${encodeURIComponent(v)}&name=${encodeURIComponent(f.name)}" target="_blank">${esc(f.name)}</a> <span class="small muted">(${esc(f.source)})</span></li>`).join('')}</ul>
+   <div style="margin-top:10px"><label class="btn ghost" style="cursor:pointer;margin:0">Upload another file<input type="file" style="display:none" onchange="uploadFile('${esc(v)}',this)"></label></div>
+ </div>`;
+}
+async function removeVendor(v){
+ try{const r=await getJSON('/api/responses/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vendor:v})});state.collected=r.files;render()}
+ catch(e){alert(e.message)}
+}
+async function receiveResponses(){
+ try{const r=await getJSON('/api/receive-responses',{method:'POST'});state.inbox=r.inbox;state.received=true;render()}
+ catch(e){alert(e.message)}
+}
+async function addVendor(v){
+ try{const r=await getJSON('/api/responses/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vendors:[v]})});state.collected=r.files;render()}
+ catch(e){alert(e.message)}
+}
+async function addAll(){
+ try{const r=await getJSON('/api/responses/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});state.collected=r.files;render()}
+ catch(e){alert(e.message)}
+}
+async function uploadFile(v,input){
+ const f=input.files&&input.files[0];if(!f)return;
+ const fd=new FormData();fd.append('vendor',v);fd.append('file',f);
+ try{const res=await fetch('/api/responses/upload',{method:'POST',body:fd});if(!res.ok)throw new Error(await res.text());const j=await res.json();state.collected=j.files;render()}
+ catch(e){alert(e.message)}
+}
+function reviewReason(q){
+ if(q.spec_mismatch)return 'Substitute: '+(q.spec_mismatch_note||'alternate configuration');
+ if(q.status==='MISSING')return 'Not quoted';
+ if(q.status==='AMBIGUOUS')return 'Ambiguous, see note';
+ if(!q.normalization?.comparable)return 'Not directly comparable';
+ return '';
+}
+const QUAL_COLS=[['Authorized reseller',/reseller|manufacturer/i,'reseller'],['OEM warranty',/warrant/i,'warrant'],['Delivery ≤ 30 days',/deliver|30\s*day/i,'deliver'],['ISO 9001',/iso/i,'iso'],['Enterprise references',/referen/i,'referen']];
+function qResult(items,rx){const it=(items||[]).find(i=>rx.test(i.question||'')||rx.test(i.evidence||''));return it||null}
+function qChip(it){const r=it?it.result:'UNCLEAR';const c=r==='MET'?'good':r==='NOT_MET'?'bad':'warn';const label=r==='MET'?'met':r==='NOT_MET'?'not met':'unclear';return `<span class="pill ${c}" title="${esc(it?.evidence||'not addressed')}">${label}</span>`}
+function qualCell(v,items,col){
+ const it=qResult(items,col[1]);const r=it?it.result:'UNCLEAR';
+ const confirm=r==='UNCLEAR'?`<div class="ractions" style="justify-content:center"><button class="rbtn ok" onclick="confirmQual(${js(v.vendor)},'${col[2]}','MET')">met</button><button class="rbtn no" onclick="confirmQual(${js(v.vendor)},'${col[2]}','NOT_MET')">not met</button></div>`:'';
+ const prov=it&&it.provenance==='carried'?'<div class="prov" style="background:#0ea5e9">carried FY25</div>':it&&it.provenance==='buyer-confirmed'?'<div class="prov" style="background:#16a34a">buyer-set</div>':'';
+ return `<td>${qChip(it)}${prov}${confirm}</td>`;
+}
+function qualPanel(){
+ const vs=state.extracted.vendors;
+ return `<div class="card"><h2>Supplier qualification</h2>
+   <div class="small muted" style="margin-bottom:10px">Every questionnaire item is assessed on equal footing. A single <b>not met</b> fails the supplier; an <b>unclear</b> item leaves it unknown until you resolve it. Confirm an unclear item once you have checked with the supplier.</div>
+   <div class="tablewrap"><table class="table"><thead><tr><th>Supplier</th><th>Overall</th>${QUAL_COLS.map(c=>`<th>${esc(c[0])}</th>`).join('')}</tr></thead>
+   <tbody>${vs.map(v=>{const items=v.qualification.items||[];return `<tr><td style="font-weight:600">${esc(v.vendor)}</td><td>${pill(v.qualification.status)}</td>${QUAL_COLS.map(c=>qualCell(v,items,c)).join('')}</tr>`}).join('')}</tbody></table></div></div>`;
+}
+function termsPanel(){
+ const vs=state.extracted.vendors;
+ const inc=b=>b===true?'included':(b===false?'extra':'-');
+ return `<div class="card"><h2>Supplier terms and risks</h2>
+   <div class="small muted" style="margin-bottom:10px">Commercial terms the analyst weighs alongside price. Only two things are flagged as a watch: a quote valid for fewer than 30 days, or restricted stock. A watch does not disqualify a supplier, but the buyer should confirm it before relying on that supplier.</div>
+   <div class="tablewrap"><table class="table"><thead><tr><th>Supplier</th><th>Warranty</th><th>Delivery</th><th>Payment</th><th>Freight</th><th>Taxes</th><th>Quote validity</th><th>Bundle</th><th>Watch</th></tr></thead>
+   <tbody>${vs.map(v=>{const t=v.commercial_terms||{},risks=v.commercial_risks||[];
+     const val=t.quote_validity_days;
+     const valTxt=(val==null)?'-':`<span${(val<30)?' style="color:var(--warn);font-weight:600"':''}>${val} days</span>`;
+     return `<tr>
+     <td style="font-weight:600;white-space:nowrap">${esc(v.vendor)}</td>
+     <td class="small">${t.warranty?esc(t.warranty):'-'}</td>
+     <td class="small">${t.delivery_days!=null?t.delivery_days+' days':'-'}</td>
+     <td class="small">${t.payment_days!=null?t.payment_days+' days':'-'}</td>
+     <td class="small">${inc(t.freight_included)}</td>
+     <td class="small">${inc(t.taxes_included)}</td>
+     <td class="small">${valTxt}</td>
+     <td class="small">${v.bundle_discount_pct?esc(v.bundle_discount_pct+'% if full RFx'):'-'}</td>
+     <td>${risks.length?risks.map(r=>`<span class="riskchip" title="${esc(r)}">⚠ ${esc(r)}</span>`).join(''):'<span class="small muted">none</span>'}</td>
+   </tr>`}).join('')}</tbody></table></div></div>`;
+}
+function js(s){return "'"+String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'"}
+function provBadge(q){
+ const m={carried:['carried FY25','#0ea5e9'],'buyer-edited':['buyer-edited','#7c3aed'],'buyer-confirmed':['buyer-confirmed','#16a34a'],'buyer-rejected':['rejected','#dc2626'],'buyer-unavailable':['unavailable','#64748b']};
+ const e=m[q.provenance];return e?`<span class="prov" style="background:${e[1]}">${e[0]}</span>`:'';
+}
+function cellActions(q){
+ if(q.provenance==='buyer-unavailable'||q.provenance==='buyer-rejected')return '';
+ const v=js(q.vendor),lid=js(q.line_id),A=[];
+ if(q.spec_mismatch){
+   A.push(`<button class="rbtn ok" onclick="resolve({vendor:${v},line_id:${lid},action:'accept_substitute'})">Accept as equivalent</button>`);
+   A.push(`<button class="rbtn no" onclick="resolve({vendor:${v},line_id:${lid},action:'reject_substitute'})">Reject</button>`);
+ } else if(q.status==='MISSING'){
+   A.push(`<button class="rbtn" onclick="addManually(${v},${lid})">Add manually</button>`);
+   A.push(`<button class="rbtn no" onclick="resolve({vendor:${v},line_id:${lid},action:'mark_unavailable'})">Mark unavailable</button>`);
+ } else if(q.status==='AMBIGUOUS'){
+   A.push(`<button class="rbtn" onclick="addManually(${v},${lid})">Add manually</button>`);
+ } else if(openAssumption(q)){
+   A.push(`<button class="rbtn ok" onclick="resolve({vendor:${v},line_id:${lid},action:'approve_assumption'})">Approve</button>`);
+   if(q.assumption_type==='unit'){
+     A.push(`<button class="rbtn" onclick="changeUnit(${v},${lid})">Change unit</button>`);
+   } else {
+     A.push(`<button class="rbtn" onclick="addManually(${v},${lid})">Edit price</button>`);
+   }
+ } else if(!q.normalization?.comparable){
+   A.push(`<button class="rbtn" onclick="addManually(${v},${lid})">Add manually</button>`);
+ }
+ return A.length?`<div class="ractions">${A.join('')}</div>`:'';
+}
+function reviewBanner(){
+ const vs=state.extracted.vendors;let sub=0,amb=0,miss=0,gap=0,openA=0;
+ vs.forEach(v=>{v.quotes.forEach(q=>{if(q.provenance)return;if(q.spec_mismatch)sub++;else if(q.status==='AMBIGUOUS')amb++;else if(q.status==='QUOTED'&&!q.normalization?.comparable)amb++;else if(q.status==='MISSING')miss++;else if(openAssumption(q))openA++});(v.qualification.items||[]).forEach(i=>{if(i.result==='UNCLEAR')gap++})});
+ const total=sub+amb+miss+gap+openA;
+ if(!total)return `<div class="okbar">✓ Every line and qualification item is resolved. This comparison is award-ready.</div>`;
+ const parts=[sub&&sub+' substitute'+(sub>1?'s':''),amb&&amb+' ambiguous',openA&&openA+' assumption'+(openA>1?'s':''),miss&&miss+' missing',gap&&gap+' qualification gap'+(gap>1?'s':'')].filter(Boolean);
+ const hv=state.req?.historical_vendors||[];
+ const ambV=vs.filter(v=>hv.includes(v.vendor)&&v.quotes.some(q=>q.status==='AMBIGUOUS'||q.status==='MISSING'));
+ const carry=ambV.map(v=>`<button class="btn small" onclick="resolveCarried(${js(v.vendor)})">Provide ${esc(v.vendor.split(' ')[0])} last-year file</button>`).join(' ');
+ return `<div class="reviewbar"><b>${total} item${total>1?'s':''} need your review</b> before this is award-ready: ${parts.join(' · ')}. Resolve them in the table below or in Supplier qualification.${carry?`<div style="margin-top:8px">${carry}</div>`:''}</div>`;
+}
+function comparison(){
+ if(!state.extracted){$('app').innerHTML=`<div class="h1">Comparison</div>${flowBar('comparison')}<div class="notice">Process the vendor quotes first.</div><div class="section"><button class="btn primary" onclick="extractAll()">▶ Process quotes for comparison</button></div>`;return}
+ const vs=state.extracted.vendors,map=vendorMap();
+ const qualified=vs.filter(v=>v.qualification.status==='PASS');
+ let rows='',reviewCells=0,basket=0,basketLines=0;
+ for(const it of state.req.items){
+   const cells=vs.map(v=>{const q=map[v.vendor+'|'+it.id]||{line_id:it.id,status:'MISSING',confidence:0,evidence:'No response',vendor:v.vendor,qual:v.qualification.status};return q});
+   const eligible=cells.filter(q=>isComparable(q)&&q.qual==='PASS'&&!openAssumption(q)).map(q=>({q,n:norm(q)}));
+   const min=eligible.length?Math.min(...eligible.map(x=>x.n)):null;
+   if(min!=null){basket+=min*it.quantity;basketLines++}
+   rows+=`<tr><td style="min-width:280px"><span class="mono" style="font-weight:600">${it.id}</span><div class="small muted">${esc(it.description)}</div><div class="small muted">Qty ${it.quantity} ${esc(it.uom)}</div></td>`+
+     cells.map(q=>{
+       const n=norm(q);const comp=isComparable(q)&&q.qual==='PASS';
+       const openA=openAssumption(q);
+       const needsReview=q.status!=='QUOTED'||!q.normalization?.comparable||openA;
+       let cls='';if(needsReview){cls='review';reviewCells++}else if(comp&&min!=null&&Math.abs(n-min)<0.01)cls='low';
+       const adj=q.normalization?.adjustments||[];
+       const reason=reviewReason(q);
+       const freight=q.normalization?.freight_extra?'<div class="small" style="color:var(--warn)">freight extra</div>':'';
+       return `<td class="num ${cls}">${n==null?'-':inr(n)}<div style="margin-top:3px">${pill(q.status)}${provBadge(q)}</div>`+
+         (q.substitute_accepted&&q.spec_mismatch_note?`<div class="small muted" title="${esc(q.spec_mismatch_note)}">accepted substitute</div>`:'')+
+         (reason?`<div class="small" style="color:var(--warn);font-weight:600">${esc(reason)}</div>`:'')+
+         (openA?`<div class="small" style="color:var(--warn)" title="${esc(q.assumption)}">assumption: ${esc(q.assumption.slice(0,64))}${q.assumption.length>64?'…':''}</div>`:'')+
+         (q.resolution_note?`<div class="small muted">↳ ${esc(q.resolution_note)}</div>`:'')+
+         (q.status==='QUOTED'?`<div class="small muted">${esc(q.currency||'INR')} · ${esc(q.quoted_uom||'ea')}</div>`:'')+
+         (adj.length?`<div style="margin-top:3px">${adj.map(a=>'<span class="adjchip">'+esc(a)+'</span>').join('')}</div>`:'')+freight+
+         `<div class="small muted" title="${esc(q.evidence||'')}">${esc((q.evidence||'').slice(0,70))}${(q.evidence||'').length>70?'…':''}</div>`+
+         cellActions(q)+`</td>`;
+     }).join('')+`</tr>`;
+ }
+ $('app').innerHTML=`
+ <div class="toolbar"><div><div class="h1">Normalized comparison</div><div class="desc">Every quote reduced to one comparable basis, <b>pre-tax ₹ per unit</b>, with qualification and exceptions kept visible.</div></div><button class="btn" onclick="downloadCSV()">⬓ Export CSV</button></div>
+ ${flowBar('comparison')}
+ <div class="section">${reviewBanner()}</div>
+ <div class="kpis">
+   <div class="kpi"><b>₹${fx().toFixed(0)}/$</b><span>Evaluation FX (single source of truth)</span></div>
+   <div class="kpi"><b>${qualified.length}/${vs.length}</b><span>Qualified suppliers</span></div>
+   <div class="kpi"><b>${basketLines}/${state.req.items.length}</b><span>Lines with a comparable qualified quote</span></div>
+   <div class="kpi"><b>${inr(basket)}</b><span>Cheapest-per-line basket (qualified only)</span></div>
+ </div>
+ <div class="section"><div class="card"><h2>Response coverage per vendor</h2><div class="small muted" style="margin-bottom:8px">Each supplier's lines by state: <b>ready</b> to compare, or needing review (an <b>assumption</b> to confirm, a <b>substitute</b>, an <b>ambiguous</b> carry-over, or a <b>missing</b> line).</div>${coverageChart()}</div></div>
+ <div class="section">${qualPanel()}</div>
+ <div class="section">${termsPanel()}</div>
+ <div class="section">
+   <h2 style="margin-bottom:8px">Side-by-side comparison</h2>
+   <div class="callout" style="margin-bottom:12px"><b>How to read this table:</b>
+     <ul class="tight" style="margin-top:6px">
+       <li><span class="pill good">green</span> = lowest comparable price among qualified suppliers on that line.</li>
+       <li><span class="pill warn">amber</span> = needs your review; the cell shows why (not quoted, ambiguous, an assumption to confirm, a substitute, or not comparable) and the action to resolve it.</li>
+       <li><span class="adjchip">USD→INR @${fx().toFixed(0)}</span> chips show the exact system conversions applied to make each price comparable.</li>
+       <li>"freight extra" means the landed cost is higher than the figure shown.</li>
+     </ul>
+     <div style="margin-top:6px"><b>Resolve to award:</b> use the in-cell actions (accept a substitute, approve an assumption, add a value, mark unavailable) and the qualification confirms to drive every line to a decision. Each resolution is tagged with its provenance, and lowest-price highlighting stays restricted to resolved, comparable lines from qualified suppliers.</div>
+   </div>
+   <div class="tablewrap"><table class="table"><thead><tr><th style="min-width:280px">RFx line</th>${vs.map(v=>`<th>${esc(v.vendor)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+ </div>
+ <div class="section"><button class="btn primary" onclick="go('analyst')">Ask the analyst →</button></div>`;
+}
+
+function analyst(){
+ if(!state.extracted){$('app').innerHTML=`<div class="h1">AI analyst</div>${flowBar('analyst')}<div class="notice">Process the vendor quotes first.</div><div class="section"><button class="btn primary" onclick="extractAll()">▶ Process quotes for comparison</button></div>`;return}
+ const voiceOK='webkitSpeechRecognition' in window||'SpeechRecognition' in window;
+ $('app').innerHTML=`
+ <div class="h1">AI analyst</div>
+ <div class="desc">Ask award questions over the normalized dataset, by voice or text. Every recommendation shows its basis, exclusions and what still needs a human.</div>
+ ${flowBar('analyst')}
+ <div class="chat">
+   <div class="messages" id="messages">${state.messages.length?state.messages.map(msgHtml).join(''):'<div class="msg ai"><div class="bubble">I can compare qualified suppliers, compute award scenarios (single vs split), explain exceptions, and flag what needs review. Try a question below.</div></div>'}</div>
+   <div class="composer"><input id="q" value="${esc(state.q||'')}" oninput="state.q=this.value" placeholder="e.g. What is the cheapest defensible split award across qualified suppliers?" onkeydown="if(event.key==='Enter')ask()"/>${voiceOK?`<button class="btn mic ${state.recording?'rec':''}" onclick="toggleMic('q')" title="Dictate your question">${state.recording?'<span class="pulse"></span>':'🎙'}</button>`:''}<button class="btn primary" onclick="ask()">Ask</button></div>
+ </div>
+ <div class="suggest">
+   <button class="btn" onclick="setQ('What is the lowest-cost award if I exclude suppliers that failed qualification?')">Lowest-cost qualified award</button>
+   <button class="btn" onclick="setQ('Which line items need human review and why?')">Review items</button>
+   <button class="btn" onclick="setQ('Compare a split award with a single-supplier award and quantify the savings.')">Split vs single supplier</button>
+   <button class="btn" onclick="setQ('What are the biggest risks in this dataset before I award?')">Award risks</button>
+ </div>`;
+ const m=$('messages');if(m)m.scrollTop=m.scrollHeight;
+}
+function msgHtml(m){return `<div class="msg ${m.role}"><div class="bubble">${m.html||esc(m.text)}</div></div>`}
+function tableHtml(t){if(!t||!t.columns?.length||!t.rows?.length)return '';return `<div class="tablewrap" style="margin-top:10px"><table class="table"><thead><tr>${t.columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${t.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+function chartHtml(c){if(!c||c.type!=='bar'||!c.labels?.length)return '';return `<div style="margin-top:12px"><div class="small muted" style="margin-bottom:4px">${esc(c.title||'')}</div>${barChart(c.labels,c.values,c.unit||'')}</div>`}
+function setQ(q){state.q=q;const el=$('q');if(el){el.value=q;el.focus()}}
+
+async function ask(){
+ const el=$('q');const q=(el?.value||'').trim();if(!q)return;
+ state.q='';state.messages.push({role:'user',text:q});render();
+ const m=$('messages');m.innerHTML+='<div class="msg ai"><div class="bubble"><span class="spin"></span> Analyzing…</div></div>';m.scrollTop=m.scrollHeight;
+ try{
+   const r=await getJSON('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,extracted:state.extracted})});
+   let html=`<div>${esc(r.answer)}</div>`+chartHtml(r.chart)+tableHtml(r.table);
+   if(r.warnings?.length)html+=`<div class="notice" style="margin-top:10px"><b>Warnings</b><ul class="tight">${r.warnings.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+   if(r.recommended_action)html+=`<div class="callout" style="margin-top:10px"><b>Recommended next step:</b> ${esc(r.recommended_action)}</div>`;
+   state.messages.push({role:'ai',html});
+ }catch(e){state.messages.push({role:'ai',text:'Unable to run the analyst: '+e.message})}
+ render();
+}
+
+/* ---------- actions ---------- */
+function go(p){state.page=p;render()}
+
+/* ---------- buyer resolutions (overlay onto the extracted dataset) ---------- */
+async function resolve(payload){
+ try{const r=await getJSON('/api/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({extracted:state.extracted,...payload})});state.extracted=r.extracted;render()}
+ catch(e){alert('Could not apply: '+e.message)}
+}
+function resolveCarried(vendor){
+ let o=$('cmodal');if(!o){o=document.createElement('div');o.id='cmodal';document.body.appendChild(o)}
+ o.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:70';
+ o.innerHTML=`<div style="background:#fff;border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);width:470px;max-width:92vw">
+   <div style="font-weight:700;font-size:15px">Provide ${esc(vendor)}'s last-year quote</div>
+   <div class="small muted" style="margin:4px 0 12px">${esc(vendor)} replied "same as last year". Upload the prior-year file to fill those lines and the durable questionnaire answers. ISO validity is time-sensitive and will still need confirmation.</div>
+   <input id="cmodalFile" type="file" accept=".xlsx,.xls" style="width:100%;font-size:13px"/>
+   <input id="cmodalNote" placeholder="Note (optional), e.g. FY2025 award record on file" style="width:100%;padding:9px 11px;border:1px solid #cbd2e6;border-radius:8px;font-size:14px;box-sizing:border-box;margin-top:10px"/>
+   <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="btn" onclick="cmodalClose()">Cancel</button><button class="btn primary" onclick="cmodalGo(${js(vendor)})">Use this file</button></div></div>`;
+ setTimeout(()=>{const el=$('cmodalFile');if(el)el.focus()},30);
+}
+function cmodalClose(){const o=$('cmodal');if(o)o.remove()}
+async function cmodalGo(vendor){
+ const fi=$('cmodalFile');const f=fi&&fi.files&&fi.files[0];
+ if(!f){alert('Please choose the last-year file to upload.');return}
+ const note=$('cmodalNote')?.value||'';
+ cmodalClose();showOverlay('Reading last year\u2019s file\u2026');
+ try{
+   const fd=new FormData();fd.append('extracted',JSON.stringify(state.extracted));fd.append('vendor',vendor);fd.append('note',note);fd.append('file',f);
+   const r=await fetch('/api/resolve-carried',{method:'POST',body:fd});
+   if(!r.ok)throw new Error(await r.text());
+   state.extracted=(await r.json()).extracted;
+ }catch(e){alert('Could not resolve: '+e.message)}
+ finally{hideOverlay();render()}
+}
+let _imodalCb=null;
+function inputModal(title,label,def,cb){
+ _imodalCb=cb;
+ let o=$('imodal');if(!o){o=document.createElement('div');o.id='imodal';document.body.appendChild(o)}
+ o.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:70';
+ o.innerHTML=`<div style="background:#fff;border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);width:420px;max-width:92vw">
+   <div style="font-weight:700;font-size:15px">${esc(title)}</div>
+   <div class="small muted" style="margin:4px 0 10px">${esc(label)}</div>
+   <input id="imodalInput" value="${esc(def||'')}" style="width:100%;padding:9px 11px;border:1px solid #cbd2e6;border-radius:8px;font-size:14px;box-sizing:border-box" onkeydown="if(event.key==='Enter')imodalOk();if(event.key==='Escape')imodalClose()"/>
+   <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="btn" onclick="imodalClose()">Cancel</button><button class="btn primary" onclick="imodalOk()">Confirm</button></div></div>`;
+ setTimeout(()=>{const el=$('imodalInput');if(el){el.focus();el.select()}},30);
+}
+function imodalClose(){const o=$('imodal');if(o)o.remove();_imodalCb=null}
+function imodalOk(){const el=$('imodalInput');const v=el?el.value:'';const cb=_imodalCb;imodalClose();if(cb)cb(v)}
+function addManually(v,lid){
+ inputModal('Add value manually','Agreed unit price for '+lid+' (INR, pre-tax, per single unit):','',raw=>{
+   const num=Number(String(raw).replace(/[^0-9.]/g,''));
+   if(!num){alert('Please enter a number.');return}
+   resolve({vendor:v,line_id:lid,action:'edit_price',value:num,uom:'ea',note:'value added manually by buyer'});
+ });
+}
+function changeUnit(v,lid){
+ inputModal('Change unit of measure','Unit for this price (e.g. "ea" or "100 pc"):','ea',u=>{
+   if(!u)return;
+   resolve({vendor:v,line_id:lid,action:'set_unit',uom:u,note:'unit set to '+u+' by buyer'});
+ });
+}
+function confirmQual(v,key,result){
+ const label=result==='NOT_MET'?'not met':'met';
+ inputModal('Mark "'+key+'" as '+label+' for '+v,'Evidence or reason (e.g. "ISO renewal confirmed by phone, 2 Sep", or "supplier cannot provide"):','',note=>{
+   resolve({vendor:v,qual_key:key,action:'confirm_qual',value:result,note:note||('marked '+label+' by buyer')});
+ });
+}
+function showOverlay(text){let o=$('overlay');if(!o){o=document.createElement('div');o.id='overlay';o.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:60';document.body.appendChild(o)}o.innerHTML=`<div style="background:#fff;border-radius:14px;padding:24px 28px;box-shadow:var(--shadow);text-align:center;max-width:360px"><div class="spin" style="width:22px;height:22px;margin:0 auto 12px"></div><div style="font-weight:600">${esc(text)}</div><div class="small muted" style="margin-top:6px">Reading five supplier responses. This can take up to a minute.</div></div>`}
+function hideOverlay(){const o=$('overlay');if(o)o.remove()}
+async function extractAll(){
+ state.loading=true;state.extractError=null;render();showOverlay('Processing vendor responses…');
+ try{state.extracted=await getJSON('/api/extract-all',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});state.page='comparison'}
+ catch(e){state.extractError=e.message}
+ finally{state.loading=false;hideOverlay();render()}
+}
+function downloadCSV(){
+ if(!state.extracted)return;
+ fetch('/api/export-csv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({extracted:state.extracted})})
+   .then(r=>r.blob()).then(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kill-the-quote-comparison.csv';a.click();URL.revokeObjectURL(a.href)})
+   .catch(e=>alert(e.message));
+}
+
+document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>go(n.dataset.page));
+async function init(){
+ try{
+   state.req=await getJSON('/api/requirements');
+   state.approved=await getJSON('/api/approved-vendors');
+   state.selected=state.approved.map(a=>a.vendor);
+   try{const rs=await getJSON('/api/responses');state.sent=rs.sent;state.received=rs.received;state.collected=rs.files||{};state.inbox=rs.inbox||[];if(rs.selected&&rs.selected.length)state.selected=rs.selected}catch(e){}
+   const s=await getJSON('/api/status');
+   $('aiStatus').textContent=s.ai_configured?'AI ready':'AI not configured';
+   $('dot').classList.toggle('good',s.ai_configured);
+ }catch(e){$('aiStatus').textContent='backend unreachable'}
+ render();
+}
+init();
+</script>
+</body>
+</html>
