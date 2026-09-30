@@ -1,4 +1,4 @@
-# Kill the Quote — AI Procurement Analyst
+#AI Procurement Analyst
 
 Prototype for the Aerchain product take-home. One end-to-end flow: a buyer **talks an RFx
 into existence**, (simulated) sends it to five vendors, the system **reads whatever they send
